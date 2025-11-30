@@ -1,7 +1,25 @@
 ## Hack-Change Online School 
 
 Полноценная образовательная платформа с React + Vite фронтендом и FastAPI бэкендом, собранная в удобный Docker-монорепозиторий.
-
+## Структура проекта
+$$
+\begin{gatchered}
+hakaton/ \\
+├── backend/           \\   
+│   ├── app/ \\
+│   ├── requirements.txt \\
+│   └── Dockerfile \\
+│ \\
+├── frontend/   \\          
+│   ├── src/ \\
+│   ├── public/ \\
+│   ├── package.json \\
+│   └── Dockerfile \\
+│ \\
+├── docker-compose.yml \\
+└── Makefile \\
+\end{gatchered}
+$$
 ## Запуск проекта
 #### Требования
 - Docker Engine
