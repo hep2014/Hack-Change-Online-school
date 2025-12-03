@@ -2,23 +2,22 @@
 
 Полноценная образовательная платформа с React + Vite фронтендом и FastAPI бэкендом, собранная в удобный Docker-монорепозиторий.
 ## Структура проекта
-$$
-\begin{array}{cc}
-hakaton/ \\
-├── backend/           \\   
-│   ├── app/ \\
-│   ├── requirements.txt \\
-│   └── Dockerfile \\
-│ \\
-├── frontend/   \\          
-│   ├── src/ \\
-│   ├── public/ \\
-│   ├── package.json \\
-│   └── Dockerfile \\
-│ \\
-├── docker-compose.yml \\
-└── Makefile \\
-\end{array}
+```
+hakaton/ 
+├── backend/           
+│   ├── app/ 
+│   ├── requirements.txt 
+│   └── Dockerfile 
+│ 
+├── frontend/   
+│   ├── src/ 
+│   ├── public/ 
+│   ├── package.json 
+│   └── Dockerfile 
+│ 
+├── docker-compose.yml 
+└── Makefile 
+```
 $$
 ## Запуск проекта
 #### Требования
