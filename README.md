@@ -331,4 +331,9 @@ curl -X POST http://localhost:8000/teacher/assignments/result \
 curl http://localhost:8000/teacher/list
 ```
 ## Демонстрация интерфейса 
-
+### Страница входа 
+![Вход](https://github.com/hep2014/Hack-Change-Online-school/raw/main/docs/images/demo-login.png)
+### Страница регистрации 
+![Регистрация](https://github.com/hep2014/Hack-Change-Online-school/raw/main/docs/images/demo-reg.png)
+### Главная страница
+![Главная](https://github.com/hep2014/Hack-Change-Online-school/raw/main/docs/images/demo-main.png)
