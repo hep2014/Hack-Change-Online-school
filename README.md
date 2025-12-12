@@ -12,7 +12,15 @@
 ## Сведения о хакатоне 
 - Даты хакатона: 28–30 ноября 2025
 - Диплом участника:  [`Hack & Change Diploma — Matveev Ilya`](docs/diploma/diplom-matveev-ilya.pdf)
-  
+
+## Демонстрация интерфейса 
+### Страница входа 
+![Вход](https://github.com/hep2014/Hack-Change-Online-school/raw/main/docs/images/demo-login.png)
+### Страница регистрации 
+![Регистрация](https://github.com/hep2014/Hack-Change-Online-school/raw/main/docs/images/demo-reg.png)
+### Главная страница
+![Главная](https://github.com/hep2014/Hack-Change-Online-school/raw/main/docs/images/demo-main.png)
+
 ## О проекте
 
 Проект реализует **полноценный MVP онлайн-школы**, включающий:
@@ -131,7 +139,15 @@ hakaton/
 - Docker Compose
 
 ### Быстрый старт
-
+- Скопируйте проект локально:
+```
+git clone https://github.com/hep2014/Hack-Change-Online-school.git
+```
+- Перейдите в папку проекта:
+```
+cd Hach-Change-Online-school
+```
+- Запустите docker compose:
 ```
 docker compose up --build
 ```
@@ -333,10 +349,4 @@ curl -X POST http://localhost:8000/teacher/assignments/result \
 ```
 curl http://localhost:8000/teacher/list
 ```
-## Демонстрация интерфейса 
-### Страница входа 
-![Вход](https://github.com/hep2014/Hack-Change-Online-school/raw/main/docs/images/demo-login.png)
-### Страница регистрации 
-![Регистрация](https://github.com/hep2014/Hack-Change-Online-school/raw/main/docs/images/demo-reg.png)
-### Главная страница
-![Главная](https://github.com/hep2014/Hack-Change-Online-school/raw/main/docs/images/demo-main.png)
+
