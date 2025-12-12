@@ -1,0 +1,43 @@
+/* Вся страница */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0f0f0f;
+  color: #d7ffe4;
+  overflow: hidden;
+}
+
+/* Контейнер под sidebar + main */
+.content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Главный контент (правый блок) */
+.main {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* Мягкая анимация появления */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Заглушка при загрузке */
+.loading {
+  font-size: 22px;
+  opacity: 0.8;
+  padding: 40px;
+}

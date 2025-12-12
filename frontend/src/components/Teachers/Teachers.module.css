@@ -1,0 +1,64 @@
+.teachers {
+  padding: 100px 0;
+  background: var(--color-bg-section);
+}
+
+.title {
+  font-size: 2.3rem;
+  font-weight: 700;
+  margin-bottom: 50px;
+  color: var(--color-accent);
+  text-shadow: 0 0 10px rgba(57,255,20,0.5);
+}
+
+.loading {
+  color: var(--color-text-muted);
+  margin-bottom: 40px;
+}
+
+/* ГРИД */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 28px;
+}
+
+/* КАРТОЧКА — тёмная, неоновая, с плавным появлением */
+
+.card {
+  background: #111;
+  border: 1px solid rgba(57,255,20,0.3);
+  padding: 20px 24px;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(57,255,20,0.12);
+  transition: 0.35s ease;
+  
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.cardVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card:hover {
+  border-color: rgba(57,255,20,0.7);
+  box-shadow: 0 0 18px rgba(57,255,20,0.45);
+  transform: translateY(-6px);
+}
+
+.fio {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--color-accent);
+  text-shadow: 0 0 6px rgba(57,255,20,0.5);
+}
+
+.text {
+  font-size: 1rem;
+  color: var(--color-text-light);
+  margin-bottom: 6px;
+}

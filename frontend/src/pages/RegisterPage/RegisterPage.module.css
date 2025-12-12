@@ -1,0 +1,256 @@
+/* ===== ОБЩИЙ КОНТЕЙНЕР ===== */
+.registerPage {
+  min-height: 100vh;
+  padding: 50px 0;
+  background: #060606; /* глубокий тёмный фон */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #e6e6e6;
+
+  background-image: radial-gradient(
+      circle at 20% 20%,
+      rgba(0, 255, 120, 0.08) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(0, 255, 120, 0.06) 0%,
+      transparent 50%
+    );
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  width: 92%;
+  max-width: 1400px;
+  gap: 50px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: containerFadeIn 0.9s ease forwards;
+}
+
+@keyframes containerFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== ЛЕВАЯ ФОРМА ===== */
+.formBlock {
+  background: #0c0c0c;
+  padding: 45px;
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(0, 255, 120, 0.15);
+  position: relative;
+  overflow: hidden;
+  animation: blockFadeIn 1.1s ease forwards;
+}
+
+@keyframes blockFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.formBlock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 255, 140, 0.08),
+    rgba(0, 255, 120, 0.02)
+  );
+  pointer-events: none;
+}
+
+.title {
+  font-size: 32px;
+  margin-bottom: 10px;
+  color: #00ff88;
+  text-shadow: 0 0 12px rgba(0, 255, 120, 0.7);
+}
+
+.subtitle {
+  font-size: 16px;
+  margin-bottom: 30px;
+  color: #bbbbbb;
+}
+
+/* ===== ФОРМА ===== */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+}
+
+.input {
+  margin-top: 8px;
+  padding: 12px 14px;
+  font-size: 15px;
+
+  background: #111;
+  border: 1px solid #1d1d1d;
+  border-radius: 8px;
+  color: #e6e6e6;
+
+  transition: 0.25s ease;
+  outline: none;
+
+  box-shadow: 0 0 0 rgba(0, 255, 100, 0);
+}
+
+/* ===== СВЕЧЕНИЕ ПРИ ФОКУСЕ ===== */
+.input:focus {
+  border-color: #00ff88;
+  background: #0f0f0f;
+  box-shadow: 0 0 10px rgba(0, 255, 120, 0.35),
+    0 0 25px rgba(0, 255, 120, 0.2);
+}
+
+/* ===== ЧЕКБОКС ===== */
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.checkbox input {
+  width: 17px;
+  height: 17px;
+}
+
+/* ===== КНОПКА РЕГИСТРАЦИИ ===== */
+
+.btn {
+  margin-top: 10px;
+  padding: 14px;
+  font-size: 17px;
+  background: #00ff88;
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.btn:hover {
+  box-shadow:
+    0 0 8px rgba(0, 255, 120, 0.5),
+    0 0 18px rgba(0, 255, 120, 0.3),
+    0 0 28px rgba(0, 255, 120, 0.15);
+  transform: translateY(-2px);
+}
+
+/* ===== ОШИБКИ ===== */
+
+.error {
+  background: rgba(255, 60, 60, 0.12);
+  color: #ff6b6b;
+  padding: 12px;
+  border-left: 4px solid #ff5252;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  animation: shake 0.25s ease;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0);}
+  25% { transform: translateX(-4px);}
+  50% { transform: translateX(4px);}
+  75% { transform: translateX(-3px);}
+  100% { transform: translateX(0);}
+}
+
+/* ===== ПРАВАЯ СТОРОНА ===== */
+
+.sidebar {
+  background: #0c0c0c;
+  padding: 42px;
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(0, 255, 120, 0.12);
+  animation: sidebarFade 1.2s ease forwards;
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+@keyframes sidebarFade {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.sidebar h3 {
+  font-size: 26px;
+  margin-bottom: 25px;
+  color: #00ff88;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* === НЕОНОВАЯ РЕАКЦИЯ ПРИ НАВЕДЕНИИ === */
+.feature {
+  background: #111;
+  padding: 14px 16px;
+  border-left: 3px solid #00ff88;
+  border-radius: 6px;
+  font-size: 17px;
+  opacity: 0;
+  transform: translateY(12px);
+
+  animation: featureUp 0.7s ease forwards;
+  animation-delay: var(--delay, 0s);
+
+  transition: 0.25s ease;
+}
+
+@keyframes featureUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feature:hover {
+  background: #151515;
+  border-left-color: #00ffaa;
+  box-shadow:
+    0 0 10px rgba(0, 255, 120, 0.4),
+    0 0 20px rgba(0, 255, 120, 0.2),
+    0 0 30px rgba(0, 255, 120, 0.1);
+  transform: translateX(6px);
+}
+
+.loginLink {
+  margin-top: 20px;
+  text-align: center;
+}

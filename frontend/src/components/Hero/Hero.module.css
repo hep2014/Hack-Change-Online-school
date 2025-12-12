@@ -1,0 +1,93 @@
+/* Общий блок Hero */
+.hero {
+  width: 100%;
+  min-height: 75vh;
+  padding: 140px 0 100px;
+  background: var(--color-bg-dark);
+  position: relative;
+  overflow: hidden;
+}
+
+/* "Дыхание" светящегося фона */
+.hero::before {
+  content: "";
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  left: -150px;
+  top: -150px;
+  background: radial-gradient(circle, rgba(57,255,20,0.12), transparent 70%);
+  filter: blur(40px);
+  animation: breathe 8s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%   { opacity: 0.45; transform: scale(1); }
+  50%  { opacity: 0.75; transform: scale(1.1); }
+  100% { opacity: 0.45; transform: scale(1); }
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  max-width: 750px;
+}
+
+/* ОБЩИЕ НАСТРОЙКИ АНИМАЦИИ */
+.title, .subtitle, .cta {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: 0.8s ease;
+}
+
+/* Когда компонент активирован */
+.active {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* ЗАГОЛОВОК */
+.title {
+  font-size: 3.4rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: var(--color-accent);
+  text-shadow: 0 0 14px rgba(57, 255, 20, 0.6),
+               0 0 28px rgba(57, 255, 20, 0.4);
+  transition-delay: 0.1s;
+}
+
+/* ПОДЗАГОЛОВОК */
+.subtitle {
+  font-size: 1.25rem;
+  color: var(--color-text-muted);
+  margin-bottom: 40px;
+  max-width: 520px;
+  transition-delay: 0.25s;
+}
+
+/* КНОПКА CTA */
+.cta {
+  background: var(--color-accent);
+  color: #000;
+  padding: 15px 38px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    opacity 0.8s ease,
+    transform 0.5s ease,
+    box-shadow 0.3s;
+  transition-delay: 0.45s;
+
+  box-shadow: 0 0 14px rgba(57,255,20,0.5),
+              0 0 22px rgba(57,255,20,0.25);
+}
+
+.cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 18px rgba(57,255,20,0.85),
+              0 0 26px rgba(57,255,20,0.5);
+}

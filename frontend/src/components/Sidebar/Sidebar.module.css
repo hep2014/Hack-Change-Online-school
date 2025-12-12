@@ -1,0 +1,86 @@
+sidebar {
+  width: 260px;
+  background: #0b0b0b;
+  border-right: 1px solid rgba(0, 255, 120, 0.15);
+  padding: 30px 20px;
+  box-shadow: 4px 0 20px rgba(0, 255, 120, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: slideIn 0.45s ease-out forwards;
+  overflow-y: auto;
+}
+
+/* Боковое плавное появление */
+@keyframes slideIn {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #9affc9;
+  text-shadow: 0 0 10px rgba(0,255,120,0.5);
+  margin-bottom: 10px;
+}
+
+/* Навигация */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nav button {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(0, 255, 120, 0.07);
+  border: 1px solid rgba(0,255,120,0.12);
+  border-radius: 10px;
+  color: #c5ffdf;
+  text-align: left;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Свечение в углах при наведении */
+.nav button:hover {
+  background: rgba(0, 255, 120, 0.16);
+  box-shadow: 0 0 12px rgba(0,255,120,0.18);
+  transform: translateX(3px);
+}
+
+/* Активный пункт меню */
+.active {
+  background: rgba(0,255,120,0.22);
+  border-color: rgba(0,255,120,0.45);
+  color: #baffdd;
+  box-shadow: 0 0 14px rgba(0,255,120,0.35);
+}
+
+/* Пульсация активного пункта */
+.active {
+  animation: pulse 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 5px rgba(0,255,120,0.25);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(0,255,120,0.45);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(0,255,120,0.25);
+  }
+}

@@ -1,33 +1,43 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
-// Страницы
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+
 import MainPage from "./pages/MainPage";
-import Login from "./pages/Login";
+import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import DashboardPage from "./pages/DashboardPage";
-import DashboardTeacherPage from "./pages/DashboardTeacherPage";
-import ProfilePage from "./pages/ProfilePage";
+import DashboardTeacher from "./pages/DashboardTeacher/DashboardTeacher";
+import HeaderPrivate from "./components/HeaderPrivate";
+
+function Layout({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+
+  const isPrivate = location.pathname.startsWith("/dashboard-teacher");
+
+  return (
+    <>
+      {isPrivate ? <HeaderPrivate /> : <Header />}
+      {children}
+      {!isPrivate && <Footer />} 
+    </>
+  );
+}
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Главная */}
-        <Route path="/" element={<MainPage />} />
+      <Layout>
 
-        {/* Авторизация */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage/>} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/dashboard-teacher" element={<DashboardTeacher />} />
+        </Routes>
 
-        {/* Кабинеты */}
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/dashboard-teacher" element={<DashboardTeacherPage />} />
-
-        {/* Профиль */}
-        <Route path="/profile" element={<ProfilePage />} />
-      </Routes>
+      </Layout>
     </BrowserRouter>
   );
 }

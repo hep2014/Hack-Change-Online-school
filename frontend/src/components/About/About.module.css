@@ -1,0 +1,54 @@
+.about {
+  padding: 100px 0;
+  background: var(--color-bg-section);
+}
+
+.title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 50px;
+  color: var(--color-accent);
+  text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
+}
+
+.counters {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.counterItem {
+  text-align: center;
+  padding: 18px 28px;
+  border-radius: 8px;
+  background: #111;
+  border: 1px solid rgba(57, 255, 20, 0.3);
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.15);
+}
+
+.counterNumber {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+}
+
+.counterLabel {
+  display: block;
+  font-size: 1rem;
+  color: var(--color-text-muted);
+}
+
+.textBlock {
+  max-width: 800px;
+  margin-top: 40px;
+  line-height: 1.7;
+  font-size: 1.1rem;
+  color: var(--color-text-light);
+}
+
+.textBlock p {
+  margin-bottom: 20px;
+}

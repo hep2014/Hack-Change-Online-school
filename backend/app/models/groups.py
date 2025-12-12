@@ -5,13 +5,12 @@ from datetime import date
 
 class Group(Base):
     __tablename__ = "groups"
-    __table_args__ = {"schema": "app"}
 
     groupid: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     creationdate: Mapped[date] = mapped_column(Date)
     courseid: Mapped[int] = mapped_column(
-        ForeignKey("app.courses.courseid"), nullable=False
+        ForeignKey("courses.courseid"), nullable=False
     )
 
     course = relationship("Course", back_populates="groups")

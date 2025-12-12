@@ -1,0 +1,77 @@
+services:
+  # -------------------- DATABASE --------------------
+  db:
+    image: postgres:16-alpine
+    container_name: onlineschool-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./docker/db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # -------------------- BACKEND --------------------
+  backend:
+    build:
+      context: ./backend
+    container_name: onlineschool-backend
+    env_file:
+      - ./.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: onlineschool
+      APP_ENV: prod
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    command: >
+      sh -lc "
+      alembic upgrade head &&
+      alembic upgrade head &&
+      uvicorn app.main:app --host 0.0.0.0 --port 8000
+      "
+
+  # -------------------- FRONTEND --------------------
+  frontend:
+    build:
+      context: ./frontend
+    container_name: onlineschool-frontend
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "80:80"
+
+  # -------------------- TELEGRAM --------------------
+  telegram:
+    build:
+      context: ./telegram
+    container_name: onlineschool-telegram
+    env_file:
+      - ./.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: onlineschool
+      APP_ENV: prod
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    command: ["python3", "main.py"]
+
+volumes:
+  pg_data:

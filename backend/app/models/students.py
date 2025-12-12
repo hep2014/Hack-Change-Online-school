@@ -5,7 +5,6 @@ from app.db.base import Base
 
 class Student(Base):
     __tablename__ = "students"
-    __table_args__ = {"schema": "app"}
 
     studentid: Mapped[int] = mapped_column(primary_key=True)
     fio: Mapped[str] = mapped_column(String(100), nullable=False)

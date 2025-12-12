@@ -3,6 +3,11 @@ from .courses import Course
 from .groups import Group
 from .assignments import Assignment
 from .schedule import Schedule
-from .student_groups import StudentGroup  # если есть
+from .student_groups import StudentGroup
 from .results import AssignmentResult
 from .students import Student
+from .failed_logins import FailedLogin
+from .logs import Log
+from .user_profiles import UserProfile
+from .users import User
+from .refresh_sessions import RefreshSession

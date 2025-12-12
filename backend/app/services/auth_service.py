@@ -1,14 +1,24 @@
+# ---------------- Необходимые импорты -------------------
 import asyncio
+import re
 from datetime import timedelta
+import secrets
+from fastapi import HTTPException
 from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+
+from jose import JWTError
+
 from app.schemas.auth import TokenResponse
 from app.models.users import User
 from app.models.teachers import Teacher
-from app.models.sessions import Session
 from app.models.failed_logins import FailedLogin
+from app.models.user_profiles import UserProfile
+from app.models.refresh_sessions import RefreshSession
+from app.utils.telegram import send_telegram_message
+
 
 from app.core.auth_core import (
     now_utc,
@@ -16,17 +26,19 @@ from app.core.auth_core import (
     verify_password,
     calculate_backoff,
     has_min_role,
-    has_permission
+    has_permission,
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+    REFRESH_LIFETIME_DAYS,
+    ACCESS_LIFETIME_MINUTES
 )
-import re
 
 
+# ---------------- Валидация пароля -------------------
 
-from sqlalchemy import select
-from app.models.users import User
-from app.models.teachers import Teacher
-from app.models.user_profiles import UserProfile
-
+class AuthError(Exception):
+    pass
 
 
 def validate_password(password: str):
@@ -34,55 +46,50 @@ def validate_password(password: str):
         raise AuthError("Пароль должен содержать минимум 8 символов")
 
     if not re.search(r"[a-z]", password):
-        raise AuthError("Пароль должен содержать хотя бы одну строчную букву (a-z)")
+        raise AuthError("Пароль должен содержать хотя бы одну строчную букву")
 
     if not re.search(r"[A-Z]", password):
-        raise AuthError("Пароль должен содержать хотя бы одну заглавную букву (A-Z)")
+        raise AuthError("Пароль должен содержать хотя бы одну заглавную букву")
 
     if not re.search(r"\d", password):
         raise AuthError("Пароль должен содержать хотя бы одну цифру")
 
     if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]", password):
-        raise AuthError("Пароль должен содержать хотя бы один специальный символ")
+        raise AuthError("Пароль должен содержать хотя бы один спецсимвол")
 
     return True
 
 
-SESSION_LIFETIME_DAYS = 30
-
-
-class AuthError(Exception):
-    pass
-
+# =========================================================
+#                Сервис аутентификации
+# =========================================================
 
 class AuthService:
-    """
-    Полностью обновлённый сервис аутентификации.
-    Работает исключительно через ORM.
-    """
 
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    # ---------------- Registration ----------------
+    # ------------------------ Регистрация ------------------------
+
     async def register(
             self,
             email: str,
             password: str,
-            role: str = "student",
+            role: str = "teacher",
             firstname: str | None = None,
             lastname: str | None = None,
             middlename: str | None = None,
-            phone: str | None = None,  # не используем пока
-            age: int | None = None,  # не используем пока
-            gender: str | None = None,  # не используем пока
+            phone: str | None = None,
+            age: int | None = None,
+            gender: str | None = None,
+            specialization: str | None = None,
     ):
         q = await self.session.execute(select(User).where(User.email == email))
-        existing = q.scalars().first()
-        if existing:
+        if q.scalars().first():
             raise AuthError("Пользователь уже существует")
 
-        # 1. Создаём сам аккаунт
+        validate_password(password)
+
         user = User(
             email=email,
             password_hash=hash_password(password),
@@ -91,25 +98,28 @@ class AuthService:
         self.session.add(user)
         await self.session.flush()
 
-        # 2. Создаём профиль (teacher_id позже заполним)
         profile = UserProfile(
             user_id=user.id,
+            student_id=None,
             teacher_id=None,
+            mentor_id=None,
         )
         self.session.add(profile)
 
-        # 3. Если преподаватель — создаём Teacher
         if role == "teacher":
             if not firstname or not lastname:
-                raise AuthError("Имя и фамилия обязательны для регистрации преподавателя")
+                raise AuthError("Имя и фамилия обязательны для учителя")
 
             fio = f"{lastname} {firstname}" + (f" {middlename}" if middlename else "")
 
             teacher = Teacher(
                 fio=fio,
-                specialization="Не указана",
+                specialization=specialization,
                 experience=0,
                 email=email,
+                phone=phone,
+                age=age,
+                gender=gender,
             )
             self.session.add(teacher)
             await self.session.flush()
@@ -117,12 +127,11 @@ class AuthService:
             profile.teacher_id = teacher.teacherid
 
         await self.session.commit()
-        await self.session.refresh(user)
         return user
 
-    # ---------------- Authentication ----------------
+    # ------------------------- ВХОД -------------------------
+
     async def login(self, email: str, password: str):
-        # backoff
         q_attempts = await self.session.execute(
             select(func.count(FailedLogin.id)).where(
                 FailedLogin.email == email,
@@ -130,9 +139,9 @@ class AuthService:
             )
         )
         attempts = q_attempts.scalar()
+
         await asyncio.sleep(calculate_backoff(attempts))
 
-        # ищем пользователя
         q_user = await self.session.execute(select(User).where(User.email == email))
         user = q_user.scalars().first()
 
@@ -141,77 +150,144 @@ class AuthService:
             await self.session.commit()
             raise AuthError("Неверный email или пароль")
 
-        # создаём сессию
-        token = uuid4()
-        expires_at = now_utc() + timedelta(days=SESSION_LIFETIME_DAYS)
+        access = create_access_token(str(user.id), user.role)
+        refresh = create_refresh_token(str(user.id))
 
-        sess = Session(
-            token=token,
+        sess = RefreshSession(
+            id=uuid4(),
             user_id=user.id,
+            token=refresh,
             created_at=now_utc(),
-            expires_at=expires_at,
+            expires_at=now_utc() + timedelta(days=REFRESH_LIFETIME_DAYS)
         )
-
         self.session.add(sess)
         await self.session.commit()
-        await self.session.refresh(sess)
 
-        return {
-            "token": str(sess.token),
-            "user_id": str(user.id),
-            "email": user.email,
-            "role": user.role,
-            "expires_at": sess.expires_at,
-        }
+        # ---------- Добавляем данные учителя ----------
+        teacher_id = None
+        firstname = None
+        lastname = None
 
-    # ---------------- Refresh ----------------
-    async def refresh(self, token: str):
-        q = await self.session.execute(select(Session).where(Session.token == token))
-        sess = q.scalars().first()
+        if user.role == "teacher":
+            q = await self.session.execute(
+                select(Teacher).where(Teacher.email == user.email)
+            )
+            teacher = q.scalars().first()
 
-        if not sess or sess.expires_at < now_utc():
-            return None
+            if teacher:
+                teacher_id = teacher.teacherid
 
-        sess.expires_at = now_utc() + timedelta(days=SESSION_LIFETIME_DAYS)
-        await self.session.commit()
+                parts = teacher.fio.split()
+                if len(parts) >= 2:
+                    lastname = parts[0]
+                    firstname = parts[1]
 
-        await self.session.refresh(sess)
-        return sess
+        return TokenResponse(
+            access=access,
+            refresh=refresh,
+            role=user.role,
+            user_id=str(user.id),
+            email=user.email,
+            teacher_id=teacher_id,
+            firstname=firstname,
+            lastname=lastname,
+        )
 
-    # ---------------- Logout ----------------
-    async def logout(self, token: str):
+    # ------------------------ REFRESH ------------------------
+
+    async def refresh(self, refresh_token: str):
+        # 1. Проверяем подпись JWT
+        try:
+            data = decode_token(refresh_token)
+        except JWTError:
+            raise AuthError("Некорректный refresh токен")
+
+        user_id = data.get("sub")
+
+        # 2. Проверяем наличие refresh в БД
+        q = await self.session.execute(
+            select(RefreshSession).where(RefreshSession.token == refresh_token)
+        )
+        session_obj = q.scalars().first()
+
+        if not session_obj or session_obj.expires_at < now_utc():
+            raise AuthError("Refresh-токен истёк или недействителен")
+
+        # 3. Получаем пользователя
+        q_user = await self.session.execute(select(User).where(User.id == user_id))
+        user = q_user.scalars().first()
+
+        if not user:
+            raise AuthError("Пользователь не найден")
+
+        # 4. Генерируем новый access
+        access = create_access_token(str(user.id), user.role)
+
+        return TokenResponse(
+            access=access,
+            refresh=refresh_token,
+            token_type="bearer",
+            expires_in=ACCESS_LIFETIME_MINUTES * 60,
+            role=user.role,
+            user_id=str(user.id),
+            email=user.email
+        )
+
+    # ------------------------ LOGOUT ------------------------
+
+    async def logout(self, refresh_token: str):
+
         await self.session.execute(
-            Session.__table__.delete().where(Session.token == token)
+            RefreshSession.__table__.delete().where(
+                RefreshSession.token == refresh_token
+            )
         )
         await self.session.commit()
 
-    # ---------------- Role check ----------------
-    async def check_role(self, token: str, required_role: str):
-        # достаём сессию
-        q = await self.session.execute(select(Session).where(Session.token == token))
-        sess = q.scalars().first()
+    # ------------------------ ROLE CHECK ------------------------
 
-        if not sess or sess.expires_at < now_utc():
+    async def check_role(self, access_token: str, required_role: str):
+        try:
+            data = decode_token(access_token)
+        except JWTError:
             return False
 
-        q_user = await self.session.execute(
-            select(User).where(User.id == sess.user_id)
-        )
-        user = q_user.scalars().first()
+        role = data.get("role")
+        return has_min_role(role, required_role)
 
-        return user and has_min_role(user.role, required_role)
+    # ------------------------ PERMISSION CHECK ------------------------
 
-    # ---------------- Permission check ----------------
-    async def check_perm(self, token: str, perm: str):
-        q = await self.session.execute(select(Session).where(Session.token == token))
-        sess = q.scalars().first()
-
-        if not sess or sess.expires_at < now_utc():
+    async def check_perm(self, access_token: str, perm: str):
+        try:
+            data = decode_token(access_token)
+        except JWTError:
             return False
 
-        q_user = await self.session.execute(
-            select(User).where(User.id == sess.user_id)
-        )
-        user = q_user.scalars().first()
+        role = data.get("role")
+        return has_permission(role, perm)
 
-        return user and has_permission(user.role, perm)
+    async def reset_password(self, email: str, chat_id: str):
+        # 1. Проверяем, что пользователь существует
+        q = await self.session.execute(select(User).where(User.email == email))
+        user = q.scalars().first()
+
+        if not user:
+            raise HTTPException(404, "Пользователь с таким email не найден")
+
+        # 2. Генерируем новый временный пароль
+        new_password = secrets.token_hex(4)
+
+        # 3. Хэшируем и обновляем пароль
+        user.password_hash = hash_password(new_password)
+        await self.session.commit()
+
+        # 4. Отправляем пароль в Telegram
+        try:
+            await send_telegram_message(
+                chat_id,
+                f"Ваш новый пароль для входа: {new_password}"
+            )
+        except Exception as e:
+            raise HTTPException(500, "Не удалось отправить сообщение в Telegram")
+
+        return True

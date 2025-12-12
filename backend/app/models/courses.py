@@ -6,7 +6,6 @@ from app.db.base import Base
 
 class Course(Base):
     __tablename__ = "courses"
-    __table_args__ = {"schema": "app"}
 
     courseid: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -14,7 +13,7 @@ class Course(Base):
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     duration: Mapped[str | None] = mapped_column(String(50))
     teacherid: Mapped[int] = mapped_column(
-        ForeignKey("app.teachers.teacherid"), nullable=False
+        ForeignKey("teachers.teacherid"), nullable=False
     )
 
     teacher = relationship("Teacher", back_populates="courses")
