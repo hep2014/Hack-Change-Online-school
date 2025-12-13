@@ -1,2 +1,2 @@
 CREATE DATABASE onlineschool;
-CREATE DATABASE "school-test";
+CREATE DATABASE "school_test";
