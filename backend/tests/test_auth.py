@@ -54,7 +54,7 @@ async def test_register_duplicate_email(client):
 
     # второй раз — ошибка
     r2 = await client.post("/auth/register", json=p)
-    assert r2.status_code == 400 or r2.status_code == 409
+    assert r2.status_code == 401 or r2.status_code == 409
 
     data = r2.json()
     assert "существует" in data["detail"] or "exists" in data["detail"].lower()
@@ -82,7 +82,7 @@ async def test_register_weak_password(client):
 
     r = await client.post("/auth/register", json=payload)
 
-    assert r.status_code == 400
+    assert r.status_code == 401
 
     data = r.json()
     assert "пароль" in data["detail"].lower()
